@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: query-morph
+    env: ruby
+    region: singapore   # closest to India; change to oregon/frankfurt if preferred
+    plan: free
+    buildCommand: |
+      bundle install
+      bundle exec rails assets:precompile
+      bundle exec rails db:create db:migrate
+    startCommand: bundle exec rails server -p $PORT -e production
+    envVars:
+      - key: RAILS_ENV
+        value: production
+      - key: RAILS_MASTER_KEY
+        sync: false          # paste the value from config/master.key manually
+      - key: RAILS_SERVE_STATIC_FILES
+        value: "true"
+      - key: RAILS_LOG_TO_STDOUT
+        value: "true"
+      - key: WEB_CONCURRENCY
+        value: "1"

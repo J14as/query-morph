@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>QueryMorph – SQL ↔ ActiveRecord Converter</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="Instantly convert SQL queries to ActiveRecord and vice versa. Free online tool for Rails developers.">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Highlight.js -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/ruby.min.js"></script>
+
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+  </head>
+
+  <body>
+    <!-- ── BACKGROUND ORBS ─────────────────────────────────────── -->
+    <div class="bg-orbs" aria-hidden="true">
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+    </div>
+
+    <!-- ── NAV ────────────────────────────────────────────────── -->
+    <nav class="navbar">
+      <div class="nav-brand">
+        <span class="brand-icon">⟡</span>
+        <span class="brand-name">Query<span class="brand-accent">Morph</span></span>
+      </div>
+      <div class="nav-links">
+        <a href="#converter" class="nav-link">Converter</a>
+        <a href="#examples" class="nav-link">Examples</a>
+        <a href="https://guides.rubyonrails.org/active_record_querying.html" target="_blank" class="nav-link nav-link-ext">Docs ↗</a>
+      </div>
+    </nav>
+
+    <!-- ── HERO ───────────────────────────────────────────────── -->
+    <section class="hero">
+      <div class="hero-badge">🚀 Rails Developer Tool</div>
+      <h1 class="hero-title">
+        SQL ↔ <span class="gradient-text">ActiveRecord</span><br>Converter
+      </h1>
+      <p class="hero-subtitle">
+        Instantly translate between raw SQL and Ruby on Rails ActiveRecord query syntax.<br>
+        Supports SELECT, INSERT, UPDATE, DELETE, JOINs, scopes, and more.
+      </p>
+    </section>
+
+    <!-- ── CONVERTER ──────────────────────────────────────────── -->
+    <section class="converter-section" id="converter">
+      <div class="converter-card">
+
+        <!-- Direction Toggle -->
+        <div class="direction-toggle">
+          <button class="dir-btn active" id="btn-sql-to-ar" data-direction="sql_to_ar">
+            <span class="dir-icon">🗄️</span>
+            SQL → ActiveRecord
+          </button>
+          <button class="swap-btn" id="swap-btn" title="Swap direction">⇄</button>
+          <button class="dir-btn" id="btn-ar-to-sql" data-direction="ar_to_sql">
+            <span class="dir-icon">💎</span>
+            ActiveRecord → SQL
+          </button>
+        </div>
+
+        <!-- Editor Panels -->
+        <div class="editor-grid">
+
+          <!-- Input Panel -->
+          <div class="editor-panel">
+            <div class="panel-header">
+              <div class="panel-label">
+                <span class="panel-dot dot-input"></span>
+                <span id="input-label">SQL Query</span>
+              </div>
+              <div class="panel-actions">
+                <button class="action-btn" id="clear-btn" title="Clear input">✕ Clear</button>
+                <button class="action-btn" id="paste-btn" title="Paste from clipboard">⊕ Paste</button>
+              </div>
+            </div>
+            <div class="editor-wrapper">
+              <textarea
+                id="input-editor"
+                class="code-editor"
+                placeholder="SELECT * FROM users WHERE active = 1 ORDER BY name LIMIT 10"
+                spellcheck="false"
+                autocorrect="off"
+                autocapitalize="off"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Center Convert Button -->
+          <div class="convert-center">
+            <button class="convert-btn" id="convert-btn">
+              <span id="convert-icon">⟶</span>
+              <span id="convert-label">Convert</span>
+            </button>
+          </div>
+
+          <!-- Output Panel -->
+          <div class="editor-panel">
+            <div class="panel-header">
+              <div class="panel-label">
+                <span class="panel-dot dot-output"></span>
+                <span id="output-label">ActiveRecord</span>
+              </div>
+              <div class="panel-actions">
+                <button class="action-btn" id="copy-btn" title="Copy output">⊙ Copy</button>
+              </div>
+            </div>
+            <div class="editor-wrapper output-wrapper">
+              <div id="output-display" class="code-output">
+                <div class="output-placeholder">
+                  <div class="placeholder-icon">✦</div>
+                  <div>Output will appear here</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Error Display -->
+        <div id="error-display" class="error-display" style="display:none">
+          <span class="error-icon">⚠</span>
+          <span id="error-message"></span>
+        </div>
+
+        <!-- Shortcut Hint -->
+        <div class="shortcut-hint">
+          Press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> to convert
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── FEATURES ────────────────────────────────────────────── -->
+    <section class="features-section">
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>Instant Conversion</h3>
+          <p>Real-time translation powered by intelligent regex parsing with no server round-trips for simple queries.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔄</div>
+          <h3>Bidirectional</h3>
+          <p>Convert SQL → ActiveRecord and ActiveRecord → SQL. Supports SELECT, INSERT, UPDATE, DELETE, and JOINs.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🧠</div>
+          <h3>Rails-Native</h3>
+          <p>Outputs idiomatic Ruby ActiveRecord chains — where, order, limit, joins, group, having, and more.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📋</div>
+          <h3>Ready to Paste</h3>
+          <p>One-click copy puts the converted query straight onto your clipboard, ready for your codebase.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── EXAMPLES ────────────────────────────────────────────── -->
+    <section class="examples-section" id="examples">
+      <div class="section-header">
+        <h2 class="section-title">Examples</h2>
+        <p class="section-subtitle">Click any example to load it into the converter</p>
+      </div>
+      <div class="examples-grid">
+        <% @examples.each do |ex| %>
+          <div class="example-card" data-direction="<%= ex[:direction] %>" data-input="<%= h(ex[:input]) %>">
+            <div class="example-header">
+              <span class="example-badge <%= ex[:direction] == 'sql_to_ar' ? 'badge-sql' : 'badge-ar' %>">
+                <%= ex[:direction] == 'sql_to_ar' ? 'SQL → AR' : 'AR → SQL' %>
+              </span>
+              <span class="example-label"><%= ex[:label] %></span>
+            </div>
+            <div class="example-input">
+              <pre><code class="language-<%= ex[:direction] == 'sql_to_ar' ? 'sql' : 'ruby' %>"><%= h(ex[:input]) %></code></pre>
+            </div>
+            <div class="example-arrow">⟶</div>
+            <div class="example-output">
+              <pre><code class="language-<%= ex[:direction] == 'sql_to_ar' ? 'ruby' : 'sql' %>"><%= h(ex[:output]) %></code></pre>
+            </div>
+            <div class="example-cta">Try this example →</div>
+          </div>
+        <% end %>
+      </div>
+    </section>
+
+    <!-- ── FOOTER ──────────────────────────────────────────────── -->
+    <footer class="footer">
+      <div class="footer-brand">
+        <span class="brand-icon">⟡</span>
+        <strong>QueryMorph</strong>
+      </div>
+      <p class="footer-text">Built with Ruby on Rails · Made for Rails developers</p>
+    </footer>
+
+    <!-- ── TOAST ──────────────────────────────────────────────── -->
+    <div id="toast" class="toast" role="alert"></div>
+
+    <!-- ── JAVASCRIPT ─────────────────────────────────────────── -->
+    <script>
+      // ── State ──────────────────────────────────────────────────
+      let currentDirection = 'sql_to_ar';
+
+      const convertBtn     = document.getElementById('convert-btn');
+      const inputEditor    = document.getElementById('input-editor');
+      const outputDisplay  = document.getElementById('output-display');
+      const errorDisplay   = document.getElementById('error-display');
+      const errorMessage   = document.getElementById('error-message');
+      const copyBtn        = document.getElementById('copy-btn');
+      const clearBtn       = document.getElementById('clear-btn');
+      const pasteBtn       = document.getElementById('paste-btn');
+      const swapBtn        = document.getElementById('swap-btn');
+      const btnSqlToAr     = document.getElementById('btn-sql-to-ar');
+      const btnArToSql     = document.getElementById('btn-ar-to-sql');
+      const inputLabel     = document.getElementById('input-label');
+      const outputLabel    = document.getElementById('output-label');
+      const convertIcon    = document.getElementById('convert-icon');
+      const toast          = document.getElementById('toast');
+
+      let outputText = '';
+
+      // ── Direction toggle ───────────────────────────────────────
+      function setDirection(direction) {
+        currentDirection = direction;
+        btnSqlToAr.classList.toggle('active', direction === 'sql_to_ar');
+        btnArToSql.classList.toggle('active', direction === 'ar_to_sql');
+
+        if (direction === 'sql_to_ar') {
+          inputLabel.textContent = 'SQL Query';
+          outputLabel.textContent = 'ActiveRecord';
+          inputEditor.placeholder = 'SELECT * FROM users WHERE active = 1 ORDER BY name LIMIT 10';
+          convertIcon.textContent = '⟶';
+        } else {
+          inputLabel.textContent = 'ActiveRecord';
+          outputLabel.textContent = 'SQL Query';
+          inputEditor.placeholder = 'User.where(active: true).order(:name).limit(10)';
+          convertIcon.textContent = '⟶';
+        }
+
+        clearOutput();
+        inputEditor.focus();
+      }
+
+      btnSqlToAr.addEventListener('click', () => setDirection('sql_to_ar'));
+      btnArToSql.addEventListener('click', () => setDirection('ar_to_sql'));
+
+      swapBtn.addEventListener('click', () => {
+        const old = inputEditor.value;
+        const newDir = currentDirection === 'sql_to_ar' ? 'ar_to_sql' : 'sql_to_ar';
+        if (outputText) { inputEditor.value = outputText; }
+        setDirection(newDir);
+      });
+
+      // ── Convert ────────────────────────────────────────────────
+      async function runConvert() {
+        const input = inputEditor.value.trim();
+        if (!input) {
+          showError('Please enter a query to convert.');
+          return;
+        }
+
+        convertBtn.classList.add('loading');
+        convertBtn.disabled = true;
+        hideError();
+
+        try {
+          const resp = await fetch('<%= convert_path %>', {
+            method:  'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ input, direction: currentDirection })
+          });
+
+          const data = await resp.json();
+
+          if (!resp.ok || data.error) {
+            showError(data.error || 'Conversion failed. Please check your syntax.');
+          } else {
+            showOutput(data.output);
+          }
+        } catch (e) {
+          showError('Network error. Please try again.');
+        } finally {
+          convertBtn.classList.remove('loading');
+          convertBtn.disabled = false;
+        }
+      }
+
+      convertBtn.addEventListener('click', runConvert);
+
+      inputEditor.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          e.preventDefault();
+          runConvert();
+        }
+        // Tab for indentation
+        if (e.key === 'Tab') {
+          e.preventDefault();
+          const start = inputEditor.selectionStart;
+          const end   = inputEditor.selectionEnd;
+          inputEditor.value = inputEditor.value.substring(0, start) + '  ' + inputEditor.value.substring(end);
+          inputEditor.selectionStart = inputEditor.selectionEnd = start + 2;
+        }
+      });
+
+      // ── Output rendering ───────────────────────────────────────
+      function showOutput(text) {
+        outputText = text;
+        const lang  = currentDirection === 'sql_to_ar' ? 'ruby' : 'sql';
+        const hl    = hljs.highlight(text, { language: lang }).value;
+        outputDisplay.innerHTML = `<pre class="output-pre"><code class="hljs language-${lang}">${hl}</code></pre>`;
+      }
+
+      function clearOutput() {
+        outputText = '';
+        outputDisplay.innerHTML = `
+          <div class="output-placeholder">
+            <div class="placeholder-icon">✦</div>
+            <div>Output will appear here</div>
+          </div>`;
+      }
+
+      function showError(msg) {
+        hideOutput();
+        errorMessage.textContent = msg;
+        errorDisplay.style.display = 'flex';
+      }
+
+      function hideError() {
+        errorDisplay.style.display = 'none';
+      }
+
+      function hideOutput() {
+        clearOutput();
+      }
+
+      // ── Copy ───────────────────────────────────────────────────
+      copyBtn.addEventListener('click', () => {
+        if (!outputText) { showToast('Nothing to copy yet!'); return; }
+        navigator.clipboard.writeText(outputText)
+          .then(() => showToast('Copied to clipboard! ✓'))
+          .catch(() => showToast('Copy failed — try manually.'));
+      });
+
+      // ── Clear ──────────────────────────────────────────────────
+      clearBtn.addEventListener('click', () => {
+        inputEditor.value = '';
+        clearOutput();
+        hideError();
+        inputEditor.focus();
+      });
+
+      // ── Paste ─────────────────────────────────────────────────
+      pasteBtn.addEventListener('click', () => {
+        navigator.clipboard.readText()
+          .then(text => {
+            inputEditor.value = text;
+            inputEditor.focus();
+          })
+          .catch(() => showToast('Clipboard read blocked by browser — paste manually (Ctrl+V)'));
+      });
+
+      // ── Toast ──────────────────────────────────────────────────
+      let toastTimer;
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('visible');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => toast.classList.remove('visible'), 2800);
+      }
+
+      // ── Examples ───────────────────────────────────────────────
+      document.querySelectorAll('.example-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const dir   = card.dataset.direction;
+          const input = card.dataset.input;
+          setDirection(dir);
+          inputEditor.value = input;
+          document.getElementById('converter').scrollIntoView({ behavior: 'smooth' });
+          runConvert();
+        });
+      });
+
+      // ── Init highlight.js ──────────────────────────────────────
+      document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.example-card pre code').forEach(el => {
+          hljs.highlightElement(el);
+        });
+      });
+    </script>
+  </body>
+</html>
