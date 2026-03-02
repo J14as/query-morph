@@ -5,6 +5,8 @@ nixPkgs = ["ruby_3_4", "libyaml", "sqlite"]
 cmds = ["bundle install"]
 
 [phases.build]
+# Propshaft serves assets directly — no SASS compile step needed.
+# We still run assets:precompile so Propshaft copies files to public/assets.
 cmds = [
   "bundle exec rails assets:precompile",
   "bundle exec rails db:create db:migrate"
